@@ -50,6 +50,7 @@
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -65,7 +66,7 @@ app = FastAPI(
     description="A role-based project management system built with SQLModel",
     version="1.0.0"
 )
-
+port = int(os.environ.get("PORT", 8000))
 # Create tables on startup (sync)
 @app.on_event("startup")
 def on_startup():
