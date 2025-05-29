@@ -51,28 +51,60 @@ def register_user(user: UserCreate, session: Session = Depends(get_session)):
     statement = select(User)
     users = session.exec(statement).all()
     user_count = len(users)
-    if user_count == 0:
-        role = UserRole.PM 
+    #check if PM already exists
+    pm_exists = session.query(User).filter(User.role == UserRole.PM).first()
+    user_count = session.query(User).count()
     
+    # If no users exist, assign PM role automatically
+    if user_count == 0:
+        role = UserRole.PM
     else:
-        if user.role=="PM":
-            raise HTTPException(
+    # If user is trying to register as PM
+        if user.role == UserRole.PM:
+            if pm_exists:
+                raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="PM already exist,select either Developer or Designer"
+                detail="A PM already exists. Please select either Developer or Designer role."
             )
+            else:
+                role = UserRole.PM
         else:
-    # Create user
-            hashed_password = get_password_hash(user.password)
-            db_user = User(
-                email=user.email,
-                username=user.username,
-                password_hash=hashed_password,
-                role=user.role
-            )
-            session.add(db_user)
-            session.commit()
-            session.refresh(db_user)
-            return db_user
+            role = user.role  # Allow Developer or Designer
+
+# Create user
+    hashed_password = get_password_hash(user.password)
+    db_user = User(
+    email=user.email,
+    username=user.username,
+    password_hash=hashed_password,
+    role=role
+    )
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
+    # if user_count == 0:
+    #     role = UserRole.PM 
+    
+    # else:
+    #     if user.role=="PM":
+    #         raise HTTPException(
+    #             status_code=status.HTTP_400_BAD_REQUEST,
+    #             detail="PM already exist,select either Developer or Designer"
+    #         )
+    #     else:
+    # # Create user
+    #         hashed_password = get_password_hash(user.password)
+    #         db_user = User(
+    #             email=user.email,
+    #             username=user.username,
+    #             password_hash=hashed_password,
+    #             role=user.role
+    #         )
+    #         session.add(db_user)
+    #         session.commit()
+    #         session.refresh(db_user)
+    #         return db_user
     
 
 @router.post("/login", response_model=Token)
