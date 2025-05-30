@@ -30,6 +30,7 @@ from typing import Optional, List
 from datetime import datetime
 from uuid import UUID, uuid4
 from enum import Enum
+from pydantic import EmailStr
 
 class UserRole(str, Enum):
     PM = "PM"
@@ -37,7 +38,7 @@ class UserRole(str, Enum):
     DESIGNER = "Designer"
 
 class UserBase(SQLModel):
-    email: str = Field(unique=True, index=True, max_length=255)
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
     username: str = Field(unique=True, index=True, max_length=100)
     role: UserRole
     is_active: bool = Field(default=True)
@@ -69,7 +70,7 @@ class UserResponse(UserBase):
     created_at: datetime
 
 class UserLogin(SQLModel):
-    email: str
+    email: EmailStr
     password: str
 
 class Token(SQLModel):

@@ -171,33 +171,45 @@ def update_issue_status(
     session.refresh(issue)
     return issue
 
+
 @router.get("/my-issues", response_model=List[IssueWithDetails])
 def get_my_issues(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    statement = select(Issue).where(Issue.assigned_to_id == current_user.id)
+    statement = select(Issue).where(Issue.created_by_id == current_user.id)
     issues = session.exec(statement).all()
     
     result = []
     for issue in issues:
         # Get project info
-        project_statement = select(Project).where(Project.id == issue.project_id)
-        project = session.exec(project_statement).first()
+        project = session.exec(
+            select(Project).where(Project.id == issue.project_id)
+        ).first()
         
+        # Get assignee info (if assigned)
+        assignee_name = None
+        if issue.assigned_to_id:
+            assignee = session.exec(
+                select(User).where(User.id == issue.assigned_to_id)
+            ).first()
+            assignee_name = assignee.username if assignee else None
+
         # Get creator info
-        creator_statement = select(User).where(User.id == issue.created_by_id)
-        creator = session.exec(creator_statement).first()
+        creator = session.exec(
+            select(User).where(User.id == issue.created_by_id)
+        ).first()
         
         issue_detail = IssueWithDetails(
             **issue.model_dump(),
             project_title=project.title if project else "Unknown",
-            assignee_name=current_user.username,
+            assignee_name=assignee_name,
             creator_name=creator.username if creator else "Unknown"
         )
         result.append(issue_detail)
     
     return result
+
 
 @router.get("/open-issues", response_model=List[IssueWithDetails])
 def get_open_issues(
