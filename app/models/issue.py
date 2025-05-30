@@ -1,36 +1,3 @@
-# from __future__ import annotations
-# from typing import Optional
-# from datetime import datetime
-# from uuid import UUID, uuid4
-# from sqlmodel import SQLModel, Field, Relationship
-# from sqlalchemy import CheckConstraint
-
-# class Issue(SQLModel, table=True):
-#     __tablename__ = "issue"
-#     __table_args__ = (
-#         CheckConstraint("status IN ('Assigned', 'In Progress', 'Review', 'Completed')", name="check_status"),
-#         CheckConstraint("priority IN ('Low', 'Medium', 'High', 'Critical')", name="check_priority"),
-#         CheckConstraint("type IN ('Bug', 'Task', 'Feature')", name="check_type"),
-#     )
-
-#     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True, nullable=False)
-#     title: str = Field(nullable=False)
-#     description: Optional[str] = Field(default=None)
-#     status: str = Field(nullable=False)
-#     priority: str = Field(nullable=False)
-#     type: str = Field(nullable=False)
-#     project_id: UUID = Field(nullable=False, foreign_key="project.id")
-#     assigned_to_id: Optional[UUID] = Field(default=None, foreign_key="user.id")
-#     created_by_id: UUID = Field(nullable=False, foreign_key="user.id")
-#     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-#     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-
-#     # Relationships
-#     project: Optional["Project"] = Relationship(back_populates="issues")
-#     assigned_to: Optional["User"] = Relationship(back_populates="assigned_issues", sa_relationship_kwargs={"foreign_keys": "[Issue.assigned_to_id]"})
-#     created_by: Optional["User"] = Relationship(back_populates="created_issues", sa_relationship_kwargs={"foreign_keys": "[Issue.created_by_id]"})
-
-
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 from datetime import datetime
