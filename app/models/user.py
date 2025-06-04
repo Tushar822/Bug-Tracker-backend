@@ -58,9 +58,18 @@ class UserCreate(UserBase):
             raise ValueError("Password and Confirm Password do not match.")
         return values
 
-class UserResponse(UserBase):
+# class UserResponse(UserBase):
+#     id: UUID
+#     created_at: datetime
+
+class UserResponse(SQLModel):
     id: UUID
+    email: EmailStr
+    username: str
+    role: UserRole
+    is_active: bool
     created_at: datetime
+
 
 class UserLogin(SQLModel):
     email: EmailStr

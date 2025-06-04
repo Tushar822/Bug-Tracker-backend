@@ -27,7 +27,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bug-tracker-frontend-ochre.vercel.app","http://localhost:3000"],  # In production, specify allowed origins
+    allow_origins=["https://bug-tracker-frontend-ochre.vercel.app","http://localhost:3000" , "https://projectsync-alpha.vercel.app"],  # In production, specify allowed origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
