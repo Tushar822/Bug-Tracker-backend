@@ -146,7 +146,7 @@ def login(user_credentials: UserLogin, session: Session = Depends(get_session)):
         value=f"Bearer {access_token}",
         httponly=True,
         secure=True,  # Enable in production (HTTPS)
-        samesite="lax",  # Recommended for security
+        samesite="none",  # Recommended for security
         max_age=COOKIE_MAX_AGE,
         path="/"  # Cookie is available for all paths
     )
