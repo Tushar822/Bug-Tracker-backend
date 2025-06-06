@@ -24,6 +24,8 @@ class UserBase(StripWhitespaceMixin, SQLModel):
     def email_valid(cls, value): return validate_email(cls, value)
 
     
+    
+
 class User(UserBase, table=True):
     __tablename__ = "users"
     
@@ -55,6 +57,10 @@ class UserCreate(UserBase):
         if values.password != values.confirm_password:
             raise ValueError("Password and Confirm Password do not match.")
         return values
+
+# class UserResponse(UserBase):
+#     id: UUID
+#     created_at: datetime
 
 class UserResponse(SQLModel):
     id: UUID

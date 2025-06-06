@@ -2,6 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.api.v1.endpoints.projects import router as projects_router
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.issues import router as issues_router
@@ -30,7 +31,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Set-Cookie"]
 )
 
 # Include routers
