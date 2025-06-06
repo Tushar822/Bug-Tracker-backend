@@ -124,7 +124,7 @@ def login(user_credentials: UserLogin, session: Session = Depends(get_session)):
     # Set secure cookie with token
     response.set_cookie(
         key=COOKIE_NAME,
-        value=f"Bearer {access_token}",
+        value=f"{access_token}",
         httponly=True,
         secure=False,  # Enable in production (HTTPS)
         samesite="none",  # Recommended for security

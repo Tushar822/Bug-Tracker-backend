@@ -50,7 +50,7 @@ async def get_current_user(
         
     try:
         # Remove "Bearer " prefix if present
-        token = access_token.replace("Bearer ", "")
+        token = access_token #.replace("Bearer ", "")
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
