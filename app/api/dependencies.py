@@ -34,7 +34,7 @@ security = HTTPBearer()
 #         raise credentials_exception
 #     return user
 
-def get_current_user(
+async def get_current_user(
     request: Request,
     session: Session = Depends(get_session),
     access_token: Optional[str] = Cookie(None, alias="access_token")
