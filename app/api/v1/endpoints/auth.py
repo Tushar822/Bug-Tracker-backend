@@ -7,6 +7,14 @@ from app.db.database import get_session
 from app.models.user import User, UserRole, UserCreate, UserResponse, UserLogin, Token
 from app.core.config import settings
 from app.api.dependencies import get_current_user,get_current_pm,get_session
+from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer
+from datetime import datetime, timedelta
+
+# Add these constants at the top of the file
+COOKIE_NAME = "access_token"
+COOKIE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days in seconds
+
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -84,7 +92,26 @@ def register_user(user: UserCreate, session: Session = Depends(get_session)):
     session.refresh(db_user)
     return db_user
 
-@router.post("/login", response_model=Token)
+# @router.post("/login", response_model=Token)
+# def login(user_credentials: UserLogin, session: Session = Depends(get_session)):
+#     statement = select(User).where(User.email == user_credentials.email)
+#     user = session.exec(statement).first()
+    
+#     if not user or not verify_password(user_credentials.password, user.password_hash):
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Incorrect email or password",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+    
+#     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+#     access_token = create_access_token(
+#         data={"sub": user.email}, expires_delta=access_token_expires
+#     )
+    
+#     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/login")
 def login(user_credentials: UserLogin, session: Session = Depends(get_session)):
     statement = select(User).where(User.email == user_credentials.email)
     user = session.exec(statement).first()
@@ -101,8 +128,97 @@ def login(user_credentials: UserLogin, session: Session = Depends(get_session)):
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Create response with user data
+    response = JSONResponse(
+        content={
+            "status": "success",
+            "user": {
+                "email": user.email,
+                "username": user.username,
+                "role": user.role
+            }
+        }
+    )
+    
+    # Set secure cookie with token
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=f"Bearer {access_token}",
+        httponly=True,
+        secure=True,  # Enable in production (HTTPS)
+        samesite="lax",  # Recommended for security
+        max_age=COOKIE_MAX_AGE,
+        path="/"  # Cookie is available for all paths
+    )
+    
+    return response
 
+@router.post("/logout")
+def logout():
+    response = JSONResponse(content={"status": "success"})
+    response.delete_cookie(
+        key=COOKIE_NAME,
+        path="/",
+        httponly=True,
+        secure=True,
+        samesite="lax"
+    )
+    return response
+
+@router.post("/login")
+def login(user_credentials: UserLogin, session: Session = Depends(get_session)):
+    statement = select(User).where(User.email == user_credentials.email)
+    user = session.exec(statement).first()
+    
+    if not user or not verify_password(user_credentials.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+    
+    # Create response with user data
+    response = JSONResponse(
+        content={
+            "status": "success",
+            "user": {
+                "email": user.email,
+                "username": user.username,
+                "role": user.role
+            }
+        }
+    )
+    
+    # Set secure cookie with token
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=f"Bearer {access_token}",
+        httponly=True,
+        secure=True,  # Enable in production (HTTPS)
+        samesite="lax",  # Recommended for security
+        max_age=COOKIE_MAX_AGE,
+        path="/"  # Cookie is available for all paths
+    )
+    
+    return response
+
+
+@router.post("/logout")
+def logout():
+    response = JSONResponse(content={"status": "success"})
+    response.delete_cookie(
+        key=COOKIE_NAME,
+        path="/",
+        httponly=True,
+        secure=True,
+        samesite="lax"
+    )
+    return response
 @router.get("/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
